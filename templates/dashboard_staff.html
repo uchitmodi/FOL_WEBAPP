@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Daring Dozen FOL Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            height: 100vh;
+            width: 250px;
+            background-color: #343a40;
+            position: fixed;
+            top: 56px;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease-in-out;
+            z-index: 100;
+        }
+
+        .sidebar a {
+            color: white;
+            padding: 15px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+        }
+
+        .sidebar a:hover {
+            background-color: #007bff;
+        }
+
+        .collapsed {
+            transform: translateX(-100%);
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1050;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 80px 20px 20px 20px;
+            width: 100%;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        .collapsed-content {
+            margin-left: 20px !important;
+        }
+
+        .toggle-btn {
+            position: fixed;
+            top: 55px;
+            left: 5px;
+            background: #343a40;
+            color: white;
+            border: none;
+            padding: 2px 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+
+        .card {
+            margin-bottom: 30px;
+            height: 100%;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">Daring Dozen Dashboard</span>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link btn btn-outline-light btn-sm" href="/logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Sidebar Toggle Button -->
+<button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <h2 class="text-center text-white my-4">COY FOL NCO</h2>
+    <a href="/log_fuel"><i class="fas fa-edit"></i> Log Fuel, Oil, and Lubricant Consumption</a>
+    <a href="/view_reports"><i class="fas fa-file-alt"></i> View Reports</a>
+</div>
+
+<!-- Main Content -->
+<div class="main-content" id="content">
+    <div class="container">
+        <div class="d-flex justify-content-center align-items-center my-4 flex-wrap gap-3">
+            <img src="{{ url_for('static', filename='logo/BMP_New.png') }}" alt="Logo 1" class="img-fluid mx-2" style="max-height: 80px;">
+            <img src="{{ url_for('static', filename='logo/MAHAR_PNG.png') }}" alt="Logo 2" class="img-fluid mx-2" style="max-height: 80px;">
+            <img src="{{ url_for('static', filename='logo/para.png') }}" alt="Logo 3" class="img-fluid mx-2" style="max-height: 80px;">
+        </div>
+        <h1 class="my-4 text-center">Welcome to the Daring Dozen FOL Automation App</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card text-white bg-primary">
+                    <div class="card-header">Log Fuel, Oil, and Lubricant Consumption</div>
+                    <div class="card-body">
+                        <h5 class="card-title">Record new consumption data</h5>
+                        <p class="card-text">Keep track of daily fuel, oil, and lubricant usage by logging it in the system.</p>
+                        <a href="/log_fuel" class="btn btn-light">Log Now</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card text-white bg-success">
+                    <div class="card-header">View Reports</div>
+                    <div class="card-body">
+                        <h5 class="card-title">Analyze consumption data</h5>
+                        <p class="card-text">View detailed reports on fuel, oil, and lubricant consumption over time.</p>
+                        <a href="/view_reports" class="btn btn-light">View Reports</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <p>&copy; 2025 Daring Dozen FOL Automation App</p>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script>
+    function toggleSidebar() {
+        let sidebar = document.getElementById("sidebar");
+        let content = document.getElementById("content");
+
+        if (sidebar.classList.contains("collapsed")) {
+            sidebar.classList.remove("collapsed");
+            content.classList.remove("collapsed-content");
+        } else {
+            sidebar.classList.add("collapsed");
+            content.classList.add("collapsed-content");
+        }
+    }
+</script>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+</body>
+</html>

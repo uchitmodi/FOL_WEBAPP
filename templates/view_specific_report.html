@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Specific Report</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4 text-center">Fuel Consumption Report: {{ filename }}</h1>
+
+        <!-- Chart -->
+        <canvas id="consumptionChart" height="100"></canvas>
+
+        <!-- Table -->
+        <table id="dataTable" class="table table-bordered table-striped mt-4">
+            <thead>
+                <tr id="tableHead"></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+
+        <a href="/view_reports" class="btn btn-secondary btn-back mt-4">Back to Reports</a>
+        <a href="{{ dashboard_url }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+
+    <script>
+        const chartData = {{ chart_data | tojson | safe }};
+        const tableData = {{ table_data | tojson | safe }};
+        const tableColumns = {{ table_columns | tojson | safe }};
+
+        // Chart.js logic
+        const labels = chartData.map(item => `${item.type}: ${item.category}`);
+        const values = chartData.map(item => item.value);
+        const backgroundColors = chartData.map(item => {
+            if (item.type === 'Fuel') return 'rgba(255, 99, 132, 0.5)';
+            if (item.type === 'Oil') return 'rgba(54, 162, 235, 0.5)';
+            return 'rgba(255, 206, 86, 0.5)';
+        });
+
+        const ctx = document.getElementById('consumptionChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Consumption',
+                    data: values,
+                    backgroundColor: backgroundColors,
+                    borderColor: 'rgba(0,0,0,0.1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Fuel, Oil, and Lubricant Consumption'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Consumption Amount' }
+                    }
+                }
+            }
+        });
+
+        // Table logic
+        const tableHead = document.getElementById("tableHead");
+        tableHead.innerHTML = tableColumns.map(col => `<th>${col}</th>`).join("");
+
+        const tableBody = document.getElementById("tableBody");
+        tableData.forEach(row => {
+            const rowHTML = tableColumns.map(col => `<td>${row[col]}</td>`).join("");
+            tableBody.innerHTML += `<tr>${rowHTML}</tr>`;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fuel and Lubricants Consumption Log</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script>
+        const vehicleData = {
+            "Alpha": {
+                "ARV WZT-3": {
+                    vehicle_numbers: ["06X9845A"],
+                    fuel: ["HSD BS-VI"],
+                    oil: ["20W50", "80W90", "OMHB", "Transmission Fluid A", "MT 16P", "Anti Corrosion anti rust"],
+                    lubricant: ["LG-280", "Gr CIATIM-201", "Grease GEM-3", "Grease RR-3", "Grease LG-320", "Grease LT-43"]
+                },
+                "CMT": {
+                    vehicle_numbers: ["03X8437X", "03X8453A"],
+                    fuel: ["HSD BS-VI"],
+                    oil: ["20W50", "Oil C-70", "Oil OM-16", "Poly Ethylene Salo PES-3", "Anti Corrosion anti rust"],
+                    lubricant: ["SG-240", "Gr CIATIM-201", "XG-279", "Grease GEM-3", "Grease LG-320"]
+                },
+                "AAT": {
+                    vehicle_numbers: ["15X011397H"],
+                    fuel: ["HSD BS-VI"],
+                    oil: ["Oil OM-16", "Oil OM-36"],
+                    lubricant: []
+                },
+                "BMP IIK": {
+                    vehicle_numbers: ["93X6963X", "02X9182A","00X7572W","94X6984E","94X6978P","22X012677H","93X6959A"],
+                    fuel: ["HSD BS-VI"],
+                    oil: ["20W50", "Oil C-70", "Oil OM-16", "Anti Corrosion anti rust"],
+                    lubricant: ["SG-240", "Gr CIATIM-201", "XG-279", "LG-280", "Grease GEM-3", "Grease LG-320"]
+                },
+                "BMP II": {
+                    vehicle_numbers: ["92X5557K", "92X5566H","91X5480E","90X5222E","89X6176Y","89X5139Y","89X5134X"],
+                    fuel: ["HSD BS-VI"],
+                    oil: ["20W50", "Oil C-70", "Oil OM-16", "Anti Corrosion anti rust"],
+                    lubricant: ["SG-240", "Gr CIATIM-201", "XG-279", "LG-280", "Grease GEM-3", "Grease LG-320"]
+                }
+            },
+
+
+            "Beta": {
+                "TATRA KOLOS": {
+                    vehicle_numbers: ["TK-101", "TK-102"],
+                    fuel: ["HSD BS-VI"],
+                    oil: ["20W40", "80W90", "Break OF-24"],
+                    lubricant: ["XG-279"]
+                },
+                "TATRA 8x8": {
+                    vehicle_numbers: ["T8x8-001", "T8x8-002"],
+                    fuel: ["HSD BS-VI"],
+                    oil: ["10W30", "20W50", "80W90", "Break OF-24", "Anti wear hyd oil", "SAEJ-1703"],
+                    lubricant: ["XG-279"]
+                },
+                "TATRA 6x6": {
+                    vehicle_numbers: ["T6x6-001", "T6x6-002"],
+                    fuel: ["HSD BS-VI"],
+                    oil: ["20W50", "80W90", "Break OF-24", "Anti wear hyd oil", "SAEJ-1703"],
+                    lubricant: ["XG-279"]
+                },
+                "TATRA 4x4": {
+                    vehicle_numbers: ["T4x4-001", "T4x4-002"],
+                    fuel: ["HSD BS-VI"],
+                    oil: ["10W30", "80W90", "Break OF-24", "Anti wear hyd oil", "SAEJ-1703"],
+                    lubricant: ["XG-279"]
+                }
+            }
+        };
+
+        function updateVehicleOptions() {
+            const vehicleClass = document.getElementById("vehicle_class").value;
+            const vehicleTypeSelect = document.getElementById("vehicle_type");
+            vehicleTypeSelect.innerHTML = "<option value=''>-- Select Vehicle Type --</option>";
+
+            if (vehicleData[vehicleClass]) {
+                Object.keys(vehicleData[vehicleClass]).forEach(type => {
+                    const option = document.createElement("option");
+                    option.value = type;
+                    option.textContent = type;
+                    vehicleTypeSelect.appendChild(option);
+                });
+            }
+        }
+
+        function updateFuelOilLubricant() {
+            const vehicleClass = document.getElementById("vehicle_class").value;
+            const vehicleType = document.getElementById("vehicle_type").value;
+
+            const fuelSelect = document.getElementById("fuel_type");
+            const oilSelect = document.getElementById("oil_type");
+            const lubricantSelect = document.getElementById("lubricant_type");
+            const vehicleNumberSelect = document.getElementById("vehicle_number");
+
+            fuelSelect.innerHTML = oilSelect.innerHTML = lubricantSelect.innerHTML = "<option value=''>-- Select --</option>";
+            vehicleNumberSelect.innerHTML = "<option value=''>-- Select Vehicle Number --</option>";
+
+            if (vehicleData[vehicleClass] && vehicleData[vehicleClass][vehicleType]) {
+                vehicleData[vehicleClass][vehicleType].fuel.forEach(fuel => {
+                    const option = document.createElement("option");
+                    option.value = fuel;
+                    option.textContent = fuel;
+                    fuelSelect.appendChild(option);
+                });
+
+                vehicleData[vehicleClass][vehicleType].oil.forEach(oil => {
+                    const option = document.createElement("option");
+                    option.value = oil;
+                    option.textContent = oil;
+                    oilSelect.appendChild(option);
+                });
+
+                vehicleData[vehicleClass][vehicleType].lubricant.forEach(lubricant => {
+                    const option = document.createElement("option");
+                    option.value = lubricant;
+                    option.textContent = lubricant;
+                    lubricantSelect.appendChild(option);
+                });
+
+                // Update Vehicle Number dropdown
+                vehicleData[vehicleClass][vehicleType].vehicle_numbers.forEach(vehicleNumber => {
+                    const option = document.createElement("option");
+                    option.value = vehicleNumber;
+                    option.textContent = vehicleNumber;
+                    vehicleNumberSelect.appendChild(option);
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4 text-center">Fuel and Lubricants Consumption Log</h1>
+        <form method="POST">
+            <div class="form-group">
+                <label for="date">Date</label>
+                <input type="date" id="date" class="form-control" name="date" required>
+            </div>
+
+            <div class="form-group">
+                <label for="vehicle_class">Vehicle Class</label>
+                <select id="vehicle_class" name="vehicle_class" class="form-control" onchange="updateVehicleOptions()" required>
+                    <option value="">-- Select Vehicle Class --</option>
+                    <option value="Alpha">A Vehicle</option>
+                    <option value="Beta">B Vehicle</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="vehicle_type">Vehicle Type</label>
+                <select id="vehicle_type" name="vehicle_type" class="form-control" onchange="updateFuelOilLubricant()" required>
+                    <option value="">-- Select Vehicle Type --</option>
+                </select>
+            </div>
+
+            <!-- Vehicle Number dropdown -->
+            <div class="form-group">
+                <label for="vehicle_number">Vehicle Number</label>
+                <select id="vehicle_number" name="vehicle_number" class="form-control" required>
+                    <option value="">-- Select Vehicle Number --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="fuel_type">Fuel Type</label>
+                <select id="fuel_type" name="fuel_type" class="form-control"></select>
+                <input type="number" name="fuel_consumption" class="form-control mt-2" placeholder="Fuel Consumption (Liters)" required>
+            </div>
+
+            <div class="form-group">
+                <label for="oil_type">Oil Type</label>
+                <select id="oil_type" name="oil_type" class="form-control"></select>
+                <input type="number" name="oil_consumption" class="form-control mt-2" placeholder="Oil Consumption (Liters)" required>
+            </div>
+
+            <div class="form-group">
+                <label for="lubricant_type">Lubricant Type</label>
+                <select id="lubricant_type" name="lubricant_type" class="form-control"></select>
+                <input type="number" name="lubricant_consumption" class="form-control mt-2" placeholder="Lubricant Consumption (Liters)" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block mt-2">Log Consumption</button>
+            <a href="{{ dashboard_url }}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+
+        </form>
+    </div>
+</body>
+</html>

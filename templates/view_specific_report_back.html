@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Specific Report</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .table {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4 text-center">Fuel Consumption Report: {{ filename }}</h1>
+        <div class="table-responsive">
+            {{ report_html | safe }}
+        </div>
+        <a href="/view_reports" class="btn btn-secondary btn-back mt-4">Back to Reports</a>
+        <a href="{{ dashboard_url }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</body>
+</html>

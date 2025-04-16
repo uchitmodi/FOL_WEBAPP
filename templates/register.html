@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register - FOL Tracker</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .register-form {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .register-form h2 {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="register-form col-md-4">
+    <h2 class="text-center">Register</h2>
+    <form action="/register" method="POST">
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" name="name" class="form-control" required/>
+        </div>
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" name="username" class="form-control" required/>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" class="form-control" required/>
+        </div>
+        <div class="form-group">
+            <label>Role</label>
+            <select name="role" class="form-control" required>
+                <option value="admin">THQ Office</option>
+                <option value="manager">Bn FOL NCO</option>
+                <option value="staff">COY FOL NCO</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success btn-block">Register</button>
+        <p class="text-center mt-3">
+            Already have an account? <a href="/login">Login here</a>
+        </p>
+    </form>
+</div>
+
+</body>
+</html>

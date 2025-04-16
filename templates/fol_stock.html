@@ -1,0 +1,211 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOL Stock</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: Arial, sans-serif; }
+        .container { margin-top: 30px; max-width: 700px; }
+        .section { padding: 20px; background: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); margin-bottom: 20px; }
+        .form-group label { font-weight: bold; }
+        .hidden { display: none; }
+        .stock-card { padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #fff; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .stock-qty { font-weight: bold; color: #007bff; }
+    </style>
+    <script>
+        const stockData = {
+            'fuel': [
+                { name: 'HSD BS-VI', qty: '1000L' },
+                { name: 'Gas 87MT', qty: '500L' }
+            ],
+            'oil': [
+                { name: '10W30', qty: '1000L' },
+                { name: '20W40', qty: '800L' },
+                { name: '20W50', qty: '900L' },
+                { name: '15W50', qty: '500L' },
+                { name: 'MGEO 80W90', qty: '600L' },
+                { name: '80W140', qty: '400L' },
+                { name: '80W90', qty: '700L' },
+                { name: 'SAE 75W 90 GL-4', qty: '300L' },
+                { name: 'Coolant Golden Cruiser 1400 Premix', qty: '500L' },
+                { name: 'SAE 15W 40 API CH 4', qty: '600L' },
+                { name: 'MGEO5W30', qty: '500L' },
+                { name: 'MGEO15W40', qty: '700L' },
+                { name: 'MGEO10W40', qty: '600L' },
+                { name: 'MGEO20W40', qty: '500L' },
+                { name: 'Gear Oil SAE-140', qty: '450L' },
+                { name: 'Oil Servo Gear', qty: '550L' },
+                { name: '15W40', qty: '500L' }
+            ],
+            'lubricant': [
+                { name: 'SG240', qty: '500L' },
+                { name: 'SG-240', qty: '500L' },
+                { name: 'XG-279', qty: '500L' },
+                { name: 'LG-280', qty: '500L' },
+                { name: 'Grease GEM-3', qty: '500L' },
+                { name: 'Coolent DAFC-30', qty: '500L' },
+                { name: 'Coolent DAFC-30/50', qty: '500L' },
+                { name: 'Grease MP', qty: '500L' },
+                { name: 'Servo G-3', qty: '500L' },
+                { name: 'Grease LG-320', qty: '500L' },
+                { name: 'Grease RR-3', qty: '500L' },
+                { name: 'Grease LT-43', qty: '500L' }
+            ]
+        };
+
+        function updateStock() {
+            const category = document.getElementById("category").value;
+            document.getElementById("stock_items").innerHTML = "";
+            stockData[category].forEach(item => {
+                document.getElementById("stock_items").innerHTML += `
+                    <div class='stock-card'>
+                        <div>
+                            <strong>${item.name}</strong>
+                            <br>
+                            <span class='stock-qty'>Current Qty: ${item.qty}</span>
+                        </div>
+                        <input type='number' class='form-control' style='width: 120px;' name='${item.name.replace(/\s+/g, "_").toLowerCase()}' placeholder='Enter quantity to add'>
+                    </div>`;
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center my-4">FOL Stock</h1>
+        <form method="POST">
+            <div class="section">
+                <h3><i class="fas fa-list"></i> Select Category</h3>
+                <div class="form-group">
+                    <label for="category">Choose Fuel, Oil, or Lubricant:</label>
+                    <select class="form-control" id="category" name="category" onchange="updateStock()">
+                        <option value="fuel">Fuel</option>
+                        <option value="oil">Oil</option>
+                        <option value="lubricant">Lubricant</option>
+                    </select>
+                </div>
+            </div>
+            <div class="section" id="stock_items"></div>
+            <div class="text-center mt-3">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='/'">Back to Dashboard</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html> -->
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FOL Stock</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: Arial, sans-serif; }
+        .container { margin-top: 30px; max-width: 800px; }
+        .section { padding: 20px; background: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .stock-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: #fff; }
+        .stock-info { flex-grow: 1; }
+        .qty-input { width: 120px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2 class="text-center mb-4">FOL Stock</h2>
+    <form method="POST">
+        <div class="section">
+            <div class="form-group">
+                <label for="category">Choose Category:</label>
+                <select class="form-control" name="category" id="category" onchange="this.form.submit()">
+                    <option value="fuel" {% if selected_category == 'fuel' %}selected{% endif %}>Fuel</option>
+                    <option value="oil" {% if selected_category == 'oil' %}selected{% endif %}>Oil</option>
+                    <option value="lubricant" {% if selected_category == 'lubricant' %}selected{% endif %}>Lubricant</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="section">
+            <h4 class="mb-3 text-primary">Current Stock for {{ selected_category|capitalize }}</h4>
+            {% for row in stock_data.itertuples() %}
+                <div class="stock-row">
+                    <div class="stock-info">
+                        <strong>{{ row._2 }}</strong><br>
+                        <span class="text-muted">Current: {{ row.Quantity }} L</span>
+                    </div>
+                    <input type="number" name="{{ row._2.replace(' ', '_') | lower }}" placeholder="Add Qty" class="form-control qty-input" step="0.01" min="0">
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-success">Log</button>
+            <a href="/" class="btn btn-secondary ml-2">Back to Dashboard</a>
+        </div>
+    </form>
+</div>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FOL Stock</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: Arial, sans-serif; }
+        .container { margin-top: 30px; max-width: 800px; }
+        .section { padding: 20px; background: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .stock-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: #fff; }
+        .stock-info { flex-grow: 1; }
+        .qty-input { width: 120px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center mb-2">FOL Stocks</h1>
+
+    <!-- GET form for category selection -->
+    <form method="GET">
+        <div class="section">
+            <div class="form-group">
+                <label for="category">Choose Category:</label>
+                <select class="form-control" name="category" id="category" onchange="this.form.submit()">
+                    <option value="fuel" {% if selected_category == 'fuel' %}selected{% endif %}>Fuel</option>
+                    <option value="oil" {% if selected_category == 'oil' %}selected{% endif %}>Oil</option>
+                    <option value="lubricant" {% if selected_category == 'lubricant' %}selected{% endif %}>Lubricant</option>
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <!-- POST form for logging quantities -->
+    <form method="POST">
+        <input type="hidden" name="category" value="{{ selected_category }}">
+        <div class="section">
+            <h4 class="mb-3 text-primary">Current Stock for {{ selected_category|capitalize }}</h4>
+            {% for row in stock_data.itertuples() %}
+                <div class="stock-row">
+                    <div class="stock-info">
+                        <strong>{{ row._2 }}</strong><br>
+                        <span class="text-muted">Current: {{ row.Quantity }} L</span>
+                    </div>
+                    <input type="number" name="{{ row._2.replace(' ', '_') | lower }}" placeholder="Add Qty" class="form-control qty-input" step="0.01" min="0">
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-success">Log</button>
+            <a href="{{ dashboard_url }}" class="btn btn-secondary ml-2">Back to Dashboard</a>
+
+        </div>
+    </form>
+</div>
+</body>
+</html>
+

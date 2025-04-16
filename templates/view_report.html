@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Reports</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4 text-center">Fuel Consumption Reports</h1>
+
+        <!-- Upload Form -->
+        <form action="/upload_report" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="report_file">Upload Excel Report</label>
+                <input type="file" class="form-control-file" id="report_file" name="report_file" accept=".xls,.xlsx" required>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Upload & View</button>
+        </form>
+
+        <hr>
+        <a href="{{ dashboard_url }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</body>
+</html>

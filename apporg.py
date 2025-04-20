@@ -8,8 +8,8 @@ import jinja2
 import pdfkit
 from openpyxl import load_workbook
 from flask import jsonify
-
-
+from werkzeug.utils import secure_filename
+import json
 
 data_folder = 'D:\\FOL_WEBAPP\\fuel_tracking' 
 fuel_types = ['HSD BS-VI', 'Gas 87 MT', 'Oil 20W 50', 'Oil SG-240', 'Grease XG-279', 'Oil 80W 90']
@@ -44,6 +44,8 @@ EXCEL_FILE = 'D:\\FOL_WEBAPP\\fol_stock.xlsx'
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+
+
 # Ensure the upload directory exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -57,42 +59,90 @@ def get_file_path(vehicle_class):
     return os.path.join(filename)
 
 def update_fuel_log(data):
-    """Updates the appropriate Excel file based on Vehicle Class and Vehicle Number."""
+    """Updates monthly and weekly logs based on vehicle class and number."""
     vehicle_class = data["Vehicle Class"]
-    file_path = get_file_path(vehicle_class)
+    vehicle_number = data["Vehicle Number"]
 
-    # Load existing data or create new DataFrame
-    if os.path.exists(file_path):
-        df = pd.read_excel(file_path)
+    # Convert the date to datetime object
+    DATE_INPUT_FORMAT = "%d-%m-%Y"
+    DATE_SAVE_FORMAT = "%Y-%m-%d"
+    date_obj = datetime.strptime(data["Date"], DATE_INPUT_FORMAT)
+    data["Date"] = date_obj.strftime(DATE_SAVE_FORMAT)
+
+    # Create folders if they don't exist
+    base_folder = os.path.join("fuel_tracking", vehicle_class)
+    month_folder = os.path.join(base_folder, "month")
+    week_folder = os.path.join(base_folder, "week")
+    os.makedirs(month_folder, exist_ok=True)
+    os.makedirs(week_folder, exist_ok=True)
+
+    # --- Save to Monthly File ---
+    month_filename = os.path.join(month_folder, f"{date_obj.strftime('%B_%Y')}.xlsx")
+
+    if os.path.exists(month_filename):
+        month_df = pd.read_excel(month_filename)
     else:
-        # Create a new DataFrame with the required columns if the file doesn't exist
-        df = pd.DataFrame(columns=[
+        month_df = pd.DataFrame(columns=[
             "Date", "Vehicle Class", "Vehicle Type", "Vehicle Number", "Fuel Type", 
             "Fuel Consumption", "Oil Type", "Oil Consumption", 
             "Lubricant Type", "Lubricant Consumption"
         ])
 
-    # Convert date to string for comparison
-    DATE_FORMAT = "%Y-%m-%d"
-    data["Date"] = datetime.strptime(data["Date"], "%d-%m-%Y").strftime(DATE_FORMAT)
-
-    # Check if the combination of Date and Vehicle Number already exists
-    existing_entry = df[(df["Date"] == data["Date"]) & (df["Vehicle Number"] == data["Vehicle Number"])]
-
-    if not existing_entry.empty:
-        # Update the existing entry if a match is found
-        df.loc[(df["Date"] == data["Date"]) & (df["Vehicle Number"] == data["Vehicle Number"]), df.columns] = data.values()
+    # Check for existing entry in monthly
+    existing_month = month_df[
+        (month_df["Date"] == data["Date"]) & (month_df["Vehicle Number"] == vehicle_number)
+    ]
+    if not existing_month.empty:
+        month_df.loc[
+            (month_df["Date"] == data["Date"]) & (month_df["Vehicle Number"] == vehicle_number),
+            month_df.columns
+        ] = data.values()
     else:
-        # If no match is found, add a new row to the DataFrame
-        df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
+        month_df = pd.concat([month_df, pd.DataFrame([data])], ignore_index=True)
 
-    # Save the updated DataFrame back to the Excel file
-    df.to_excel(file_path, index=False)
+    month_df.to_excel(month_filename, index=False)
+
+    # --- Save to Weekly File ---
+    start_of_week = date_obj - timedelta(days=date_obj.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
+    week_filename = os.path.join(
+        week_folder,
+        f"fuel_tracking_{start_of_week.strftime('%d-%m-%Y')}_to_{end_of_week.strftime('%d-%m-%Y')}.xlsx"
+    )
+
+    if os.path.exists(week_filename):
+        week_df = pd.read_excel(week_filename)
+    else:
+        week_df = pd.DataFrame(columns=month_df.columns)  # Same structure
+
+    # Check for existing entry in weekly
+    existing_week = week_df[
+        (week_df["Date"] == data["Date"]) & (week_df["Vehicle Number"] == vehicle_number)
+    ]
+    if not existing_week.empty:
+        week_df.loc[
+            (week_df["Date"] == data["Date"]) & (week_df["Vehicle Number"] == vehicle_number),
+            week_df.columns
+        ] = data.values()
+    else:
+        week_df = pd.concat([week_df, pd.DataFrame([data])], ignore_index=True)
+
+    week_df.to_excel(week_filename, index=False)
 # Function to load or create weekly Excel file
-def load_or_create_excel(date):
-    start_date = date - timedelta(days=date.weekday())  # Start of the week (Monday)
+def load_or_create_excel(date, vehicle_class):
+    start_date = date - timedelta(days=date.weekday())  # Monday
     end_date = start_date + timedelta(days=6)
-    filename = os.path.join(data_folder, f'fuel_tracking_{start_date.strftime(date_format)}_to_{end_date.strftime(date_format)}.xlsx')
+    date_format = "%d-%m-%Y"
+
+    # Path to week folder for that vehicle class
+    week_folder = os.path.join("fuel_tracking", vehicle_class, "week")
+    os.makedirs(week_folder, exist_ok=True)
+
+    # File name with date range
+    filename = os.path.join(
+        week_folder, 
+        f'fuel_tracking_{start_date.strftime(date_format)}_to_{end_date.strftime(date_format)}.xlsx'
+    )
 
     print(f"Loading or creating Excel: {filename}")  # Debugging line
 
@@ -101,10 +151,15 @@ def load_or_create_excel(date):
         df = pd.read_excel(filename)
     else:
         print(f"File does not exist, creating a new one")
-        df = pd.DataFrame(columns=['Date', 'Order Number'] + fuel_types)
+        df = pd.DataFrame(columns=[
+            "Date", "Vehicle Class", "Vehicle Type", "Vehicle Number", "Fuel Type", 
+            "Fuel Consumption", "Oil Type", "Oil Consumption", 
+            "Lubricant Type", "Lubricant Consumption"
+        ])
         df.to_excel(filename, index=False)
 
     return df, filename
+
 
 # Function to create weekly Excel file
 def create_weekly_excel(start_date, order_number):
@@ -260,6 +315,34 @@ def get_dashboard_route():
         'manager': '/manager_dashboard',
         'staff': '/staff_dashboard'
     }.get(user_role, '/staff_dashboard')
+    
+def monthly_log(data):
+    vehicle_class = data["Vehicle Class"]
+    date_obj = datetime.strptime(data["Date"], "%Y-%m-%d")
+    month_year = date_obj.strftime("%B-%Y")  # Format: April-2025
+
+    # Define folder path for monthly logs
+    base_dir = os.path.join("fuel_tracking", vehicle_class, "month")
+    os.makedirs(base_dir, exist_ok=True)
+
+    # File path
+    file_path = os.path.join(base_dir, f"{month_year}.xlsx")
+
+    # Load existing file or create new DataFrame
+    if os.path.exists(file_path):
+        df = pd.read_excel(file_path)
+    else:
+        df = pd.DataFrame(columns=[
+            "Date", "Vehicle Class", "Vehicle Type", "Vehicle Number", "Fuel Type", 
+            "Fuel Consumption", "Oil Type", "Oil Consumption", 
+            "Lubricant Type", "Lubricant Consumption"
+        ])
+
+    # Append data
+    df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
+
+    # Save back to Excel
+    df.to_excel(file_path, index=False)
 
 def fol_used(fuel_type, fuel_consumption, oil_type, oil_consumption, lubricant_type, lubricant_consumption):
     """Subtracts the used quantities from stock (case insensitive)."""
@@ -391,7 +474,7 @@ def generate_voucher():
         )
 
 
-        pdf_file = r"D:\FOL_WEBAPP\FOL_voucher.pdf"
+        pdf_file = r"D:\\FOL_WEBAPP\\FOL_voucher.pdf"
 
         return render_template('success.html', dashboard_url=dashboard_url)
     
@@ -526,6 +609,7 @@ def log_fuel():
         
         # Update the fuel log with the new data
         update_fuel_log(data)
+        # monthly_log(data)
         
         # Call function to track fuel, oil, and lubricant usage
         fol_used(fuel_type, fuel_consumption, oil_type, oil_consumption, lubricant_type, lubricant_consumption)
@@ -642,5 +726,62 @@ def stock():
     return render_template("fol_stock.html", selected_category=selected_category, stock_data=stock_df, dashboard_url=dashboard_url)
 
 
+app.secret_key = 'secret-key'
+app.config['UPLOAD_FOLDER'] = 'uploads'
+
+# Allowed Excel extensions
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'xls', 'xlsx'}
+
+# Vehicle log route
+
+@app.route('/veh_log', methods=['GET', 'POST'])
+def veh_log():
+    graph_data = None
+    log_table = None
+    dashboard_url = get_dashboard_route()   # or your custom logic for dashboard URL
+
+    if request.method == 'POST':
+        file = request.files.get('logFile')
+        vehicle_class = request.form.get('vehicle_class')
+        vehicle_number = request.form.get('vehicle_number_dynamic')
+
+        if file and allowed_file(file.filename) and vehicle_class and vehicle_number:
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+
+            # Read Excel file
+            df = pd.read_excel(filepath)
+
+            # Save full data for possible reuse (optional)
+            session['data'] = df.to_dict(orient='records')
+
+            # Filter by selected vehicle number
+            filtered_df = df[df['Vehicle Number'] == vehicle_number]
+
+            if not filtered_df.empty:
+                dates = filtered_df['Date'].astype(str).tolist()
+                fuel = filtered_df['Fuel Consumption'].tolist()
+                oil = filtered_df['Oil Consumption'].tolist()
+                lubricant = filtered_df['Lubricant Consumption'].tolist()
+
+                graph_data = {
+                    'dates': json.dumps(dates),
+                    'fuel': json.dumps(fuel),
+                    'oil': json.dumps(oil),
+                    'lubricant': json.dumps(lubricant)
+                }
+
+                # Create HTML table to show logs
+                log_table = filtered_df.to_html(classes='table table-striped table-bordered', index=False)
+
+    return render_template(
+        'vehicle_log.html',
+        graph_data=graph_data,
+        log_table=log_table,
+        dashboard_url=dashboard_url
+    )
+
 if __name__ == '__main__':
-    app.run(host="0.0.0.0",port=5000)
+    app.run(debug="True")

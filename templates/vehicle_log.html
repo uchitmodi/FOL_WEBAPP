@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vehicle Log</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const vehicleData = {
+            "Alpha": {
+                "ARV WZT-3": { vehicle_numbers: ["06X9845A"] },
+                "CMT": { vehicle_numbers: ["03X8437X", "03X8453A"] },
+                "AAT": { vehicle_numbers: ["15X011397H"] },
+                "BMP IIK": { vehicle_numbers: ["93X6963X", "02X9182A", "00X7572W", "94X6984E", "94X6978P", "22X012677H", "93X6959A"] },
+                "BMP II": { vehicle_numbers: ["92X5557K", "92X5566H", "91X5480E", "90X5222E", "89X6176Y", "89X5139Y", "89X5134X"] }
+            },
+            "Beta": {
+                "TATRA KOLOS": { vehicle_numbers: ["TK-101", "TK-102"] },
+                "TATRA 8x8": { vehicle_numbers: ["T8x8-001", "T8x8-002"] },
+                "TATRA 6x6": { vehicle_numbers: ["T6x6-001", "T6x6-002"] },
+                "TATRA 4x4": { vehicle_numbers: ["T4x4-001", "T4x4-002"] }
+            }
+        };
+
+        function updateVehicleTypeList() {
+            const cls = document.getElementById("vehicle_class").value;
+            const typeSel = document.getElementById("vehicle_type");
+            const numSel  = document.getElementById("vehicle_number_dynamic");
+
+            typeSel.innerHTML = "<option value=''>-- Select Type --</option>";
+            numSel.innerHTML  = "<option value=''>-- Select Vehicle Number --</option>";
+
+            if (cls && vehicleData[cls]) {
+                Object.keys(vehicleData[cls]).forEach(type => {
+                    const opt = document.createElement("option");
+                    opt.value   = type;
+                    opt.text    = type;
+                    typeSel.appendChild(opt);
+                });
+            }
+        }
+
+        function updateVehicleList() {
+            const cls = document.getElementById("vehicle_class").value;
+            const type= document.getElementById("vehicle_type").value;
+            const numSel = document.getElementById("vehicle_number_dynamic");
+
+            numSel.innerHTML = "<option value=''>-- Select Vehicle Number --</option>";
+
+            if (cls && type && vehicleData[cls] && vehicleData[cls][type]) {
+                vehicleData[cls][type].vehicle_numbers.forEach(num => {
+                    const opt = document.createElement("option");
+                    opt.value = num;
+                    opt.text  = num;
+                    numSel.appendChild(opt);
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Vehicle Log Viewer</h2>
+
+    <!-- File Upload + Controls -->
+    <form action="/veh_log" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="logFile">Upload Vehicle Log File (Excel)</label>
+            <input type="file" class="form-control-file" name="logFile" id="logFile" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="vehicle_class">Vehicle Class</label>
+                <select id="vehicle_class" name="vehicle_class" class="form-control" onchange="updateVehicleTypeList()" required>
+                    <option value="">-- Select Class --</option>
+                    <option value="Alpha">A Vehicle</option>
+                    <option value="Beta">B Vehicle</option>
+                </select>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="vehicle_type">Vehicle Type</label>
+                <select id="vehicle_type" name="vehicle_type" class="form-control" onchange="updateVehicleList()" required>
+                    <option value="">-- Select Type --</option>
+                </select>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="vehicle_number_dynamic">Vehicle Number</label>
+                <select id="vehicle_number_dynamic" name="vehicle_number_dynamic" class="form-control" required>
+                    <option value="">-- Select Vehicle Number --</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Interchanged button positions -->
+        <div class="form-group d-flex justify-content-between mt-3">
+            <a href="{{ dashboard_url }}" class="btn btn-secondary">← Back to Dashboard</a>
+            <button type="submit" class="btn btn-primary">Upload</button>
+        </div>
+    </form>
+
+    <!-- Logs Table -->
+    {% if log_table %}
+    <div class="mt-5">
+        <h4 class="text-center mb-3">Uploaded Vehicle Log Data</h4>
+        <div class="table-responsive">
+            {{ log_table | safe }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Graph Section -->
+    {% if graph_data %}
+    <div class="mt-5">
+        <h4 class="text-center">Fuel, Oil & Lubricant Consumption</h4>
+        <canvas id="logGraph"></canvas>
+    </div>
+    <script>
+        const ctx = document.getElementById('logGraph').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {{ graph_data.dates | safe }},
+                datasets: [
+                    {
+                        label: 'Fuel',
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        data: {{ graph_data.fuel | safe }}
+                    },
+                    {
+                        label: 'Oil',
+                        backgroundColor: 'rgba(255, 206, 86, 0.5)',
+                        data: {{ graph_data.oil | safe }}
+                    },
+                    {
+                        label: 'Lubricant',
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        data: {{ graph_data.lubricant | safe }}
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+    {% endif %}
+</div>
+</body>
+</html>
+1
